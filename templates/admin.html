@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Dashboard to manage, audit, and transition student registration applications.">
+    <title>Admin Dashboard - Student Registration System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo" onclick="window.location.href='/'" style="cursor:pointer">Registration Admin</div>
+        <ul class="nav-links">
+            <li><a href="/admin" class="active">Dashboard</a></li>
+            <li><a href="/student">Student Portal</a></li>
+            <li><button onclick="logoutAdmin()" class="btn-logout" id="logout-btn">Logout 🔒</button></li>
+        </ul>
+    </header>
+
+    <div class="container">
+        <!-- Dashboard Statistics Panel -->
+        <div class="dashboard-actions">
+            <h2 style="font-size: 1.8rem; font-weight: 700; margin: 0;">Registration Applications</h2>
+            <button onclick="exportCSV()" class="btn-secondary" id="export-csv-btn">
+                📤 Export to CSV
+            </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="glass-panel" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="dashboard-actions" style="margin: 0; padding: 0;">
+                <div class="search-filters">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="admin-search" placeholder="Search by name, email, ID, or phone..." oninput="handleSearchInput()">
+                    </div>
+                    <div style="width: 180px;">
+                        <select id="admin-status-filter" onchange="handleFilterChange()">
+                            <option value="">All Statuses</option>
+                            <option value="Submitted">Submitted</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="page-info" id="table-summary-info">
+                    Showing 0-0 of 0 entries
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Panel -->
+        <div class="glass-panel" style="padding: 0; overflow: hidden; border-radius: 16px;">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reg ID</th>
+                            <th>Full Name</th>
+                            <th>Course</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Registered At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body">
+                        <!-- Dynamic content injected here -->
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                                Loading applications...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table footer & Pagination -->
+            <div class="pagination" style="padding: 1.25rem 2rem; border-top: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.1);">
+                <div class="page-info" id="pagination-info">
+                    Page 1 of 1
+                </div>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="prev-page-btn" onclick="changePage(-1)" disabled>Previous</button>
+                    <button class="pagination-btn" id="next-page-btn" onclick="changePage(1)" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide Drawer Details -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="student-drawer">
+        <div class="drawer-header">
+            <h3>Student Application Details</h3>
+            <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+        </div>
+
+        <div class="drawer-content">
+            <!-- Full details -->
+            <div style="border-bottom: 1px solid var(--glass-border); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div>
+                        <h4 id="drawer-student-name" style="font-size: 1.4rem; color: var(--text-primary);">John Doe</h4>
+                        <p id="drawer-student-course" style="color: var(--secondary); font-weight: 500;">Computer Science</p>
+                    </div>
+                    <span id="drawer-student-status" class="badge badge-submitted">Submitted</span>
+                </div>
+
+                <div class="detail-grid">
+                    <div class="detail-field">
+                        <label>Registration ID</label>
+                        <p id="drawer-reg-id">REG1001</p>
+                    </div>
+                    <div class="detail-field">
+                        <label>Date of Birth</label>
+                        <p id="drawer-dob">2005-05-15</p>
+                    </div>
+                    <div class="detail-field">
+                        <label>Gender</label>
+                        <p id="drawer-gender">Male</p>
+                    </div>
+                    <div class="detail-field">
+                        <label>Registered Date</label>
+                        <p id="drawer-created">2026-06-24</p>
+                    </div>
+                    <div class="detail-field full-width">
+                        <label>Email Address</label>
+                        <p id="drawer-email">john.doe@example.com</p>
+                    </div>
+                    <div class="detail-field full-width">
+                        <label>Phone Number</label>
+                        <p id="drawer-phone">01712345678</p>
+                    </div>
+                    <div class="detail-field full-width">
+                        <label>Residential Address</label>
+                        <p id="drawer-address" style="line-height: 1.4;">123 Main St, Springfield</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action inputs for Submitted status -->
+            <div class="action-box" id="admin-actions-container" style="display: none;">
+                <h4>Review Decision</h4>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="action-remarks">Decision Remarks / Notes</label>
+                    <textarea id="action-remarks" rows="2" placeholder="Optional audit trail remarks..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-approve" onclick="updateRegistrationStatus('approve')">Approve ✓</button>
+                    <button class="btn-reject" onclick="updateRegistrationStatus('reject')">Reject ✕</button>
+                </div>
+            </div>
+
+            <!-- Audit Trail timeline -->
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem;">Audit Trail History</h4>
+            <div class="timeline" id="drawer-timeline">
+                <!-- Timeline items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

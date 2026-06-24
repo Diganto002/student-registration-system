@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Register for courses and track your registration status.">
+    <title>Student Portal - Registration System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo" onclick="window.location.href='/'" style="cursor:pointer">Registration System</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/student" class="active">Student Portal</a></li>
+            <li><a href="/admin">Admin Panel</a></li>
+        </ul>
+    </header>
+
+    <div class="container">
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('register-tab')">New Course Registration</button>
+            <button class="tab-btn" onclick="switchTab('track-tab')">Track Application</button>
+        </div>
+
+        <!-- Registration Tab -->
+        <div id="register-tab" class="tab-content active">
+            <div class="glass-panel">
+                <h2>Application Form</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                    Please fill out all the details accurately. Submissions are processed and audited by registration admins.
+                </p>
+
+                <form id="registration-form" onsubmit="submitRegistration(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <input type="text" id="first_name" name="first_name" placeholder="John" required>
+                            <span class="error-message" id="err-first_name"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" placeholder="Doe" required>
+                            <span class="error-message" id="err-last_name"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="john.doe@example.com" required>
+                            <span class="error-message" id="err-email"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number (11 Digits)</label>
+                            <input type="tel" id="phone" name="phone" placeholder="01712345678" required>
+                            <span class="error-message" id="err-phone"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="date_of_birth">Date of Birth (Must be age &ge; 16)</label>
+                            <input type="date" id="date_of_birth" name="date_of_birth" required>
+                            <span class="error-message" id="err-date_of_birth"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="error-message" id="err-gender"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="course_name">Select Target Course</label>
+                            <select id="course_name" name="course_name" required>
+                                <option value="" disabled selected>Select a Course</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Data Science & AI">Data Science & AI</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                <option value="Electrical Engineering">Electrical Engineering</option>
+                                <option value="Business Administration">Business Administration</option>
+                            </select>
+                            <span class="error-message" id="err-course_name"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width" style="margin-bottom: 2rem;">
+                        <label for="address">Residential Address</label>
+                        <textarea id="address" name="address" rows="3" placeholder="Enter complete address details..." required></textarea>
+                        <span class="error-message" id="err-address"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submit-reg-btn">Submit Application 🚀</button>
+                </form>
+
+                <!-- Success Screen Injection -->
+                <div id="success-screen-wrapper" style="display: none;">
+                    <div class="success-screen">
+                        <div class="success-icon">✓</div>
+                        <h2>Registration Submitted Successfully!</h2>
+                        <p>Your enrollment has been saved. Please write down your unique Registration ID to track its status.</p>
+                        <div class="reg-id-display" id="display-reg-id">REGXXXX</div>
+                        <br>
+                        <button class="btn-secondary" onclick="resetForm()">Submit Another Application</button>
+                        <button class="btn-primary" onclick="switchToTracker()">Track Registration Status</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracking Tab -->
+        <div id="track-tab" class="tab-content">
+            <div class="glass-panel">
+                <h2>Application Tracker</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                    Search your registration using your Email, Phone Number, or Registration ID.
+                </p>
+
+                <div class="lookup-search-box">
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <input type="text" id="track-query" placeholder="e.g. REG1001, john.doe@example.com, or 01712345678" style="padding: 0.8rem 1rem;">
+                    </div>
+                    <button class="btn-primary" onclick="trackStatus()" style="padding: 0.8rem 1.8rem;" id="track-btn">Track 🔍</button>
+                </div>
+                <span class="error-message" id="track-error" style="margin-bottom: 1rem; display: block;"></span>
+
+                <div class="lookup-result-card" id="lookup-result">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+                        <div>
+                            <h3 id="lookup-name" style="font-size: 1.4rem; margin-bottom: 0.25rem;">John Doe</h3>
+                            <p id="lookup-course" style="color: var(--secondary); font-weight: 500;">Computer Science</p>
+                        </div>
+                        <span id="lookup-status-badge" class="badge badge-submitted">Submitted</span>
+                    </div>
+
+                    <div class="detail-grid">
+                        <div class="detail-field">
+                            <label>Registration ID</label>
+                            <p id="lookup-reg-id">REG1001</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Application Date</label>
+                            <p id="lookup-date">2026-06-24</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Email Address</label>
+                            <p id="lookup-email">john.doe@example.com</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Phone Number</label>
+                            <p id="lookup-phone">01712345678</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/student.js"></script>
+</body>
+</html>

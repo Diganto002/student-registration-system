@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal for Student Registration System - Register for courses and track application status.">
+    <title>Student Registration Portal</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="portal-wrapper">
+        <div class="portal-title">
+            <h1>Student Registration System</h1>
+            <p>Welcome to the Academy Portal. Register for your upcoming academic courses or manage applications with ease.</p>
+        </div>
+
+        <div class="portal-cards">
+            <!-- Card 1: Student Portal -->
+            <div class="portal-card" onclick="window.location.href='/student'">
+                <div class="portal-icon">🎓</div>
+                <h2>Student Portal</h2>
+                <p>Submit a new course registration request, validate eligibility details, and track your ongoing application status.</p>
+                <a href="/student" class="btn-primary" id="student-portal-btn">Enter Student Portal</a>
+            </div>
+
+            <!-- Card 2: Admin Dashboard -->
+            <div class="portal-card" onclick="window.location.href='/admin'">
+                <div class="portal-icon">🔒</div>
+                <h2>Admin Dashboard</h2>
+                <p>Secure login for staff. Review registration applications, manage approvals, audit registration timelines, and export data.</p>
+                <a href="/admin" class="btn-secondary" id="admin-portal-btn">Access Admin Panel</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

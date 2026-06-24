@@ -1,0 +1,29 @@
+mermaid
+erDiagram
+    students {
+        int id PK "PRIMARY KEY AUTOINCREMENT"
+        varchar registration_id UK "UNIQUE NOT NULL"
+        varchar first_name "NOT NULL"
+        varchar last_name "NOT NULL"
+        varchar email UK "UNIQUE NOT NULL"
+        varchar phone UK "UNIQUE NOT NULL"
+        date date_of_birth "NOT NULL"
+        varchar gender "NOT NULL"
+        text address "NOT NULL"
+        varchar course_name "NOT NULL"
+        varchar status "CHECK IN ('Submitted', 'Approved', 'Rejected')"
+        timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+        timestamp updated_at "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    status_history {
+        int id PK "PRIMARY KEY AUTOINCREMENT"
+        int student_id FK "FOREIGN KEY REFERENCES students(id)"
+        varchar old_status "NOT NULL"
+        varchar new_status "NOT NULL"
+        varchar changed_by "NOT NULL"
+        timestamp changed_at "DEFAULT CURRENT_TIMESTAMP"
+        text remarks
+    }
+
+    students ||--o{ status_history : "tracks status changes for"
