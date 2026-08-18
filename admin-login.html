@@ -134,40 +134,47 @@
 
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
+      const isGitHubPages = window.location.hostname.includes('github.io');
 
       try {
-        let res;
-        try {
-          res = await fetch('/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-          });
-        } catch (netErr) {
-          res = null;
-        }
-
-        if (res && res.ok) {
-          const data = await res.json();
-          localStorage.setItem('adminToken', data.token);
-          localStorage.setItem('adminUser', data.admin?.username || 'spetrum');
-          window.location.href = 'dashboard.html';
-        } else if (res) {
-          const data = await res.json();
-          alert('Error: ' + (data.message || 'Invalid credentials'));
-        } else {
-          // GitHub Pages static demo login check
+        if (isGitHubPages) {
+          // Client-side authentication on GitHub Pages
           const u = username.toLowerCase();
-          if ((u === 'spetrum' || u === 'spectrum') && password === 'admin123') {
+          if ((u === 'spetrum' || u === 'spetum' || u === 'spectrum' || u === 'admin') && password === 'admin123') {
             localStorage.setItem('adminToken', 'admin-token-spetrum-authenticated-2026');
             localStorage.setItem('adminUser', username);
             window.location.href = 'dashboard.html';
           } else {
-            alert('Error: Invalid admin username or password (use spetrum / admin123)');
+            alert('Error: Invalid admin username or password (use username: spetrum, password: admin123)');
+          }
+        } else {
+          // Local / Backend Server API authentication
+          const res = await fetch('/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUser', data.admin?.username || 'spetrum');
+            window.location.href = 'dashboard.html';
+          } else {
+            const data = await res.json().catch(() => ({ message: 'Invalid username or password' }));
+            alert('Error: ' + (data.message || 'Invalid credentials'));
           }
         }
       } catch (err) {
-        alert('Network error while logging in.');
+        // Fallback in case of server offline
+        const u = username.toLowerCase();
+        if ((u === 'spetrum' || u === 'spetum' || u === 'spectrum' || u === 'admin') && password === 'admin123') {
+          localStorage.setItem('adminToken', 'admin-token-spetrum-authenticated-2026');
+          localStorage.setItem('adminUser', username);
+          window.location.href = 'dashboard.html';
+        } else {
+          alert('Error: Invalid admin credentials (username: spetrum, password: admin123)');
+        }
       } finally {
         btn.disabled = false;
         btn.innerText = 'Log In to Dashboard';
