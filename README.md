@@ -1,6 +1,6 @@
 # Student Registration System
 
-A full-stack enterprise **Student Registration System** featuring Node.js, Express.js, SQLite, strict validation middleware (`express-validator`), status transition workflow engine, Admin authentication system, interactive OpenAPI (Swagger) API documentation, and a responsive Tailwind CSS portal.
+A full-stack **Student Registration System** featuring Node.js, Express.js, SQLite, strict validation middleware (`express-validator`), status transition workflow engine, Admin authentication system, interactive OpenAPI (Swagger) API documentation, and a responsive Tailwind CSS portal.
 
 **University:** University Of Liberal Arts Bangladesh (ULAB)
 
