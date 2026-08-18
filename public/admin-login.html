@@ -27,7 +27,7 @@
   <header class="bg-white border-b border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       
-      <a href="/" class="flex items-center gap-3">
+      <a href="index.html" class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
           <i class="fa-solid fa-university"></i>
         </div>
@@ -45,11 +45,11 @@
         </button>
 
         <!-- Navigation Links -->
-        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold transition">
+        <a href="index.html" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold transition">
           Home Portal
         </a>
 
-        <a href="/register.html" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5">
+        <a href="register.html" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5">
           <i class="fa-solid fa-user-plus"></i>
           <span>Student Form</span>
         </a>
@@ -136,19 +136,35 @@
       const password = document.getElementById('password').value.trim();
 
       try {
-        const res = await fetch('/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
+        let res;
+        try {
+          res = await fetch('/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+        } catch (netErr) {
+          res = null;
+        }
 
-        if (res.ok && data.success) {
+        if (res && res.ok) {
+          const data = await res.json();
           localStorage.setItem('adminToken', data.token);
           localStorage.setItem('adminUser', data.admin?.username || 'spetrum');
-          window.location.href = '/dashboard.html';
-        } else {
+          window.location.href = 'dashboard.html';
+        } else if (res) {
+          const data = await res.json();
           alert('Error: ' + (data.message || 'Invalid credentials'));
+        } else {
+          // GitHub Pages static demo login check
+          const u = username.toLowerCase();
+          if ((u === 'spetrum' || u === 'spectrum') && password === 'admin123') {
+            localStorage.setItem('adminToken', 'admin-token-spetrum-authenticated-2026');
+            localStorage.setItem('adminUser', username);
+            window.location.href = 'dashboard.html';
+          } else {
+            alert('Error: Invalid admin username or password (use spetrum / admin123)');
+          }
         }
       } catch (err) {
         alert('Network error while logging in.');

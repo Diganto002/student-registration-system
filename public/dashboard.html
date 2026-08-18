@@ -27,7 +27,7 @@
   <header class="bg-white border-b border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       
-      <a href="/" class="flex items-center gap-3">
+      <a href="index.html" class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
           <i class="fa-solid fa-university"></i>
         </div>
@@ -45,11 +45,11 @@
         </button>
 
         <!-- Navigation Links -->
-        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold transition">
+        <a href="index.html" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold transition">
           Home Portal
         </a>
 
-        <a href="/register.html" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5">
+        <a href="register.html" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5">
           <i class="fa-solid fa-user-plus"></i>
           <span>Student Form</span>
         </a>
@@ -185,7 +185,7 @@
     const adminToken = localStorage.getItem('adminToken');
     const adminUser = localStorage.getItem('adminUser') || 'spetrum';
     if (!adminToken) {
-      window.location.href = '/admin-login.html';
+      window.location.href = 'admin-login.html';
     } else {
       document.getElementById('adminUserBadge').innerText = adminUser;
     }
@@ -193,15 +193,59 @@
     let currentFilter = 'All';
     let currentSearch = '';
 
+    // Initial mock dataset for static GitHub Pages demo
+    const defaultMockStudents = [
+      { id: 1, registration_id: 'REG1001', first_name: 'Mh', last_name: 'Diganto', email: 'mhdiganto@gmail.com', phone: '01712345678', date_of_birth: '2002-10-14', gender: 'Male', address: 'Mohammadpur, Dhaka', course_name: 'Computer Science & Engineering (CSE)', status: 'Approved', created_at: new Date().toISOString() },
+      { id: 2, registration_id: 'REG1002', first_name: 'Mostagir', last_name: 'Hossain', email: 'mhdiganto002@gmail.com', phone: '01912345678', date_of_birth: '2000-10-13', gender: 'Male', address: 'Bogura', course_name: 'Software Engineering (SE)', status: 'Approved', created_at: new Date().toISOString() },
+      { id: 3, registration_id: 'REG1003', first_name: 'Mahmudul', last_name: 'Hasan', email: 'mahmudul.hasan@gmail.com', phone: '01812345678', date_of_birth: '2001-05-20', gender: 'Male', address: 'Uttara, Dhaka', course_name: 'Data Science & Artificial Intelligence (DSAI)', status: 'Rejected', created_at: new Date().toISOString() },
+      { id: 4, registration_id: 'REG1004', first_name: 'Ayesha', last_name: 'Rahman', email: 'ayesha.rahman@gmail.com', phone: '01612345678', date_of_birth: '2003-08-15', gender: 'Female', address: 'Dhanmondi, Dhaka', course_name: 'Bachelor of Business Administration (BBA)', status: 'Submitted', created_at: new Date().toISOString() },
+      { id: 5, registration_id: 'REG1005', first_name: 'Tanvir', last_name: 'Ahmed', email: 'tanvir.ahmed@gmail.com', phone: '01512345678', date_of_birth: '1999-12-01', gender: 'Male', address: 'Mirpur, Dhaka', course_name: 'Media Studies & Journalism (MSJ)', status: 'Submitted', created_at: new Date().toISOString() }
+    ];
+
+    if (!localStorage.getItem('mockStudents')) {
+      localStorage.setItem('mockStudents', JSON.stringify(defaultMockStudents));
+    }
+
     async function loadStudents() {
       try {
-        const params = new URLSearchParams({ search: currentSearch, status: currentFilter });
-        const res = await fetch('/students?' + params.toString());
-        const data = await res.json();
+        let res;
+        try {
+          const params = new URLSearchParams({ search: currentSearch, status: currentFilter });
+          res = await fetch('/students?' + params.toString());
+        } catch (netErr) {
+          res = null;
+        }
 
-        if (res.ok && data.success) {
+        if (res && res.ok) {
+          const data = await res.json();
           renderStats(data.stats);
           renderTable(data.data);
+        } else {
+          // GitHub Pages demo fallback
+          let list = JSON.parse(localStorage.getItem('mockStudents') || '[]');
+          if (currentSearch) {
+            const s = currentSearch.toLowerCase();
+            list = list.filter(item => 
+              (item.registration_id && item.registration_id.toLowerCase().includes(s)) ||
+              (item.first_name && item.first_name.toLowerCase().includes(s)) ||
+              (item.last_name && item.last_name.toLowerCase().includes(s)) ||
+              (item.email && item.email.toLowerCase().includes(s)) ||
+              (item.phone && item.phone.includes(s))
+            );
+          }
+          if (currentFilter && currentFilter !== 'All') {
+            list = list.filter(item => item.status === currentFilter);
+          }
+
+          const allList = JSON.parse(localStorage.getItem('mockStudents') || '[]');
+          const stats = {
+            total: allList.length,
+            submitted: allList.filter(x => x.status === 'Submitted').length,
+            approved: allList.filter(x => x.status === 'Approved').length,
+            rejected: allList.filter(x => x.status === 'Rejected').length,
+          };
+          renderStats(stats);
+          renderTable(list);
         }
       } catch (err) {
         console.error('Error loading students:', err);
@@ -240,8 +284,8 @@
             <td class="p-3 text-right space-x-1">
               <button onclick="viewDetails('${s.registration_id}')" class="px-2.5 py-1 rounded bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs transition">Details</button>
               ${isSubmitted ? `
-                <button onclick="updateStatus(${s.id}, 'approve')" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Approve</button>
-                <button onclick="updateStatus(${s.id}, 'reject')" class="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition">Reject</button>
+                <button onclick="updateStatus(${s.id}, 'approve', '${s.registration_id}')" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Approve</button>
+                <button onclick="updateStatus(${s.id}, 'reject', '${s.registration_id}')" class="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition">Reject</button>
               ` : `<span class="text-xs text-slate-400 italic">Finalized</span>`}
             </td>
           </tr>
@@ -249,43 +293,72 @@
       }).join('');
     }
 
-    async function updateStatus(id, action) {
+    async function updateStatus(id, action, regId) {
       if (!confirm(`Are you sure you want to ${action.toUpperCase()} this student application?`)) return;
 
       try {
-        const res = await fetch(`/students/${id}/${action}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminToken}`
-          },
-          body: JSON.stringify({ remarks: `Action ${action} performed by Admin ${adminUser}` })
-        });
-        const data = await res.json();
+        let res;
+        try {
+          res = await fetch(`/students/${id}/${action}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${adminToken}`
+            },
+            body: JSON.stringify({ remarks: `Action ${action} performed by Admin ${adminUser}` })
+          });
+        } catch (netErr) {
+          res = null;
+        }
 
-        if (res.ok && data.success) {
+        if (res && res.ok) {
           alert(`Success: Registration updated to ${action.toUpperCase()}`);
           loadStudents();
-        } else {
+        } else if (res) {
+          const data = await res.json();
           alert('Error: ' + (data.message || 'Operation failed'));
+        } else {
+          // GitHub Pages demo fallback
+          let mockList = JSON.parse(localStorage.getItem('mockStudents') || '[]');
+          const target = mockList.find(x => x.id === id || x.registration_id === regId);
+          if (target) {
+            target.status = action === 'approve' ? 'Approved' : 'Rejected';
+            localStorage.setItem('mockStudents', JSON.stringify(mockList));
+            alert(`Success (Demo): Registration updated to ${action.toUpperCase()}`);
+            loadStudents();
+          }
         }
       } catch (err) {
-        alert('Network error while updating status.');
+        alert('Status update error: ' + err.message);
       }
     }
 
     async function viewDetails(regId) {
       try {
-        const res = await fetch(`/students/${regId}`);
-        const data = await res.json();
+        let s;
+        try {
+          const res = await fetch(`/students/${regId}`);
+          if (res.ok) {
+            const data = await res.json();
+            s = data.data;
+          }
+        } catch (netErr) {
+          s = null;
+        }
 
-        if (res.ok && data.success) {
-          const s = data.data;
+        if (!s) {
+          const mockList = JSON.parse(localStorage.getItem('mockStudents') || '[]');
+          s = mockList.find(x => x.registration_id === regId);
+        }
+
+        if (s) {
           document.getElementById('modalName').innerText = `${s.first_name} ${s.last_name} (${s.registration_id})`;
           
-          let historyHtml = (s.history || []).map(h => `
+          let historyHtml = (s.history || [
+            { old_status: 'Submitted', new_status: s.status, updated_at: s.created_at, remarks: 'Audit verified' }
+          ]).map(h => `
             <div class="border-l-2 border-indigo-500 pl-3 py-1">
-              <div class="font-bold text-slate-800 dark:text-slate-100">${h.old_status} &rarr; ${h.new_status}</div>
+              <div class="font-bold text-slate-800 dark:text-slate-100">${h.old_status || 'N/A'} &rarr; ${h.new_status}</div>
               <div class="text-[11px] text-slate-400">${new Date(h.updated_at).toLocaleString()} - ${h.remarks || ''}</div>
             </div>
           `).join('');
@@ -339,7 +412,7 @@
     function logout() {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
-      window.location.href = '/admin-login.html';
+      window.location.href = 'admin-login.html';
     }
 
     loadStudents();
